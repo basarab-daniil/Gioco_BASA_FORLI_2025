@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Street Fighter Clone</title>
+    <title>Selezione Modalità</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="menu">
-        <h1>Street Fighter</h1>
-        <button onclick="startGame('game.html')">1v1 (PvP)</button>
-        <button onclick="startGame('practice.html')">Pratica</button>
+        <h1>Street Fighter Clone</h1>
+        <button onclick="selectMode('1v1')">1v1 (PvP)</button>
+        <button onclick="selectMode('practice')">Pratica</button>
     </div>
 
     <script>
-        function startGame(mode) {
-            window.location.href = mode;
+        function selectMode(mode) {
+            localStorage.setItem('gameMode', mode);
+            window.location.href = 'select.html';
         }
     </script>
 </body>

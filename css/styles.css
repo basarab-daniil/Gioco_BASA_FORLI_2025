@@ -55,3 +55,40 @@ button:hover {
     0% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.8); }
     100% { box-shadow: 0 0 30px rgba(255, 255, 0, 1); }
 }
+.character-select {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+}
+
+.characters {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.character {
+    cursor: pointer;
+    border: 3px solid transparent;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+.character img {
+    width: 100px;
+    height: auto;
+    display: block;
+    margin: auto;
+}
+
+.character p {
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.character:hover, .character.selected {
+    border: 3px solid yellow;
+    transform: scale(1.1);
+}

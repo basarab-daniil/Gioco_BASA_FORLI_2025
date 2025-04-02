@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selezione Personaggio</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="character-select">
+        <h1 id="mode-title">Seleziona il tuo personaggio</h1>
+        <div class="characters">
+            <div class="character" onclick="selectCharacter('ryu')">
+                <img src="assets/characters/ryu.png" alt="Ryu">
+                <p>Ryu</p>
+            </div>
+            <div class="character" onclick="selectCharacter('ken')">
+                <img src="assets/characters/ken.png" alt="Ken">
+                <p>Ken</p>
+            </div>
+            <div class="character" onclick="selectCharacter('chunli')">
+                <img src="assets/characters/chunli.png" alt="Chun-Li">
+                <p>Chun-Li</p>
+            </div>
+        </div>
+        <button onclick="confirmSelection()">Conferma</button>
+    </div>
+
+    <script src="js/select.js"></script>
+</body>
+</html>
