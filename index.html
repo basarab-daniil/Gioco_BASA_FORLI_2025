@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Street Fighter Clone</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="menu">
+        <h1>Street Fighter</h1>
+        <button onclick="startGame('game.html')">1v1 (PvP)</button>
+        <button onclick="startGame('practice.html')">Pratica</button>
+    </div>
+
+    <script>
+        function startGame(mode) {
+            window.location.href = mode;
+        }
+    </script>
+</body>
+</html>

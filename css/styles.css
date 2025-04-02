@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Press Start 2P', cursive;
+    text-align: center;
+    background: url('../assets/backgrounds/menu-bg.jpg') no-repeat center center/cover;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.menu {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+    border: 3px solid red;
+    animation: flicker 1.5s infinite alternate;
+}
+
+h1 {
+    font-size: 24px;
+    text-shadow: 3px 3px 5px red;
+    margin-bottom: 20px;
+}
+
+button {
+    display: block;
+    margin: 15px auto;
+    padding: 15px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(90deg, red, orange);
+    border: 2px solid yellow;
+    border-radius: 8px;
+    box-shadow: 0px 4px 5px rgba(255, 165, 0, 0.8);
+    transition: 0.3s;
+}
+
+button:hover {
+    background: linear-gradient(90deg, orange, red);
+    transform: scale(1.1);
+}
+
+@keyframes flicker {
+    0% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.8); }
+    100% { box-shadow: 0 0 30px rgba(255, 255, 0, 1); }
+}
