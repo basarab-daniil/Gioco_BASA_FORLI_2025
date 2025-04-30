@@ -1,31 +1,41 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Selezione Personaggio</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
     <div class="character-select">
-        <h1 id="mode-title">Seleziona il tuo personaggio</h1>
+        <h1 id="mode-title">Seleziona i personaggi</h1>
         <div class="characters">
-            <div class="character" onclick="selectCharacter('ryu')">
-                <img src="assets/characters/ryu.png" alt="Ryu">
-                <p>Ryu</p>
+            <div class="player-col left">
+                <h2>Giocatore 1</h2>
+                <div class="character-list">
+                    <button class="character-btn" onclick="selectCharacter(1, 'ryu')">Ryu</button>
+                    <button class="character-btn" onclick="selectCharacter(1, 'ken')">Ken</button>
+                    <button class="character-btn" onclick="selectCharacter(1, 'chunli')">Chun-Li</button>
+                </div>
             </div>
-            <div class="character" onclick="selectCharacter('ken')">
-                <img src="assets/characters/ken.png" alt="Ken">
-                <p>Ken</p>
+            <div class="character-preview">
+                <div id="preview1" class="preview-box"></div>
+                <div id="preview2" class="preview-box"></div>
             </div>
-            <div class="character" onclick="selectCharacter('chunli')">
-                <img src="assets/characters/chunli.png" alt="Chun-Li">
-                <p>Chun-Li</p>
+            <div class="player-col right">
+                <h2>Giocatore 2</h2>
+                <div class="character-list">
+                    <button class="character-btn" onclick="selectCharacter(2, 'ryu')">Ryu</button>
+                    <button class="character-btn" onclick="selectCharacter(2, 'ken')">Ken</button>
+                    <button class="character-btn" onclick="selectCharacter(2, 'chunli')">Chun-Li</button>
+                </div>
             </div>
         </div>
-        <button onclick="confirmSelection()">Conferma</button>
+        <button class="confirm-btn" onclick="confirmSelection()">Conferma</button>
     </div>
-
     <script src="js/select.js"></script>
 </body>
+
 </html>

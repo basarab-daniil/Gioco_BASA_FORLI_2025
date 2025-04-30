@@ -1,8 +1,19 @@
+const characterColors = {
+    ryu: 'blue',
+    ken: 'red',
+    chunli: 'green'
+};
+
+export function setPlayerSprite(player, character) {
+    // Puoi sostituire questa logica per gestire sprite diversi
+    player.color = characterColors[character] || 'gray';
+}
+
 export const player1 = {
-    x: 300, // Posizione iniziale sull'asse X
-    y: 500, // Posizione iniziale sull'asse Y
-    width: 90, // Larghezza del rettangolo
-    height: 200, // Altezza del rettangolo
+    x: 300,
+    y: 500,
+    width: 90,
+    height: 200,
     color: 'blue',
     speed: 7,
     velocityY: 0,
@@ -31,12 +42,12 @@ export const player1 = {
 
         // Gestisci la collisione con l'altro giocatore
         if (
+            otherPlayer &&
             this.x < otherPlayer.x + otherPlayer.width &&
             this.x + this.width > otherPlayer.x &&
             this.y < otherPlayer.y + otherPlayer.height &&
             this.y + this.height > otherPlayer.y
         ) {
-            // Risolvi la collisione spostando i giocatori
             if (this.x < otherPlayer.x) {
                 this.x -= this.speed;
                 otherPlayer.x += otherPlayer.speed;
@@ -56,11 +67,11 @@ export const player1 = {
 };
 
 export const player2 = {
-    x: 1000, // Posizione iniziale sull'asse X
-    y: 500, // Posizione iniziale sull'asse Y
+    x: 1000,
+    y: 500,
     width: 90,
     height: 200,
-    color: 'red', // Colore diverso per distinguere
+    color: 'red',
     speed: 7,
     velocityY: 0,
     gravity: 0.8,
@@ -76,24 +87,21 @@ export const player2 = {
         this.velocityY += this.gravity;
         this.y += this.velocityY;
 
-        // Mantieni il giocatore sul pavimento
         if (this.y + this.height >= canvas.height) {
             this.y = canvas.height - this.height;
             this.velocityY = 0;
             this.isJumping = false;
         }
 
-        // Mantieni il giocatore all'interno del canvas sull'asse X
         this.x = Math.max(0, Math.min(this.x, canvas.width - this.width));
 
-        // Gestisci la collisione con l'altro giocatore
         if (
+            otherPlayer &&
             this.x < otherPlayer.x + otherPlayer.width &&
             this.x + this.width > otherPlayer.x &&
             this.y < otherPlayer.y + otherPlayer.height &&
             this.y + this.height > otherPlayer.y
         ) {
-            // Risolvi la collisione spostando i giocatori
             if (this.x < otherPlayer.x) {
                 this.x -= this.speed;
                 otherPlayer.x += otherPlayer.speed;
