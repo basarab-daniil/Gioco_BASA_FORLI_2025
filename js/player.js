@@ -15,15 +15,23 @@ export const player1 = {
     width: 90,
     height: 200,
     color: 'blue',
-    speed: 7,
+    speed: 10,
     velocityY: 0,
-    gravity: 0.8,
-    jumpStrength: 15,
+    gravity: 1.2,
+    jumpStrength: 16,
     isJumping: false,
+    isPunching: false,
+    punchCooldown: false,
 
     draw(ctx) {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        // Disegna il pugno se il giocatore sta colpendo
+        if (this.isPunching) {
+            ctx.fillStyle = 'yellow';
+            ctx.fillRect(this.x + this.width, this.y + this.height / 2 - 25, 60, 50); // Pugno più lungo e spesso
+        }
     },
 
     update(canvas, otherPlayer) {
@@ -63,6 +71,21 @@ export const player1 = {
             this.velocityY = -this.jumpStrength;
             this.isJumping = true;
         }
+    },
+
+    punch() {
+        if (!this.punchCooldown) {
+            this.isPunching = true;
+            this.punchCooldown = true;
+
+            setTimeout(() => {
+                this.isPunching = false;
+            }, 200); // Il pugno dura 200ms
+
+            setTimeout(() => {
+                this.punchCooldown = false;
+            }, 500); // Cooldown di 500ms
+        }
     }
 };
 
@@ -72,15 +95,23 @@ export const player2 = {
     width: 90,
     height: 200,
     color: 'red',
-    speed: 7,
+    speed: 10,
     velocityY: 0,
-    gravity: 0.8,
-    jumpStrength: 15,
+    gravity: 1.2,
+    jumpStrength: 16,
     isJumping: false,
+    isPunching: false,
+    punchCooldown: false,
 
     draw(ctx) {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        // Disegna il pugno se il giocatore sta colpendo
+        if (this.isPunching) {
+            ctx.fillStyle = 'yellow';
+            ctx.fillRect(this.x - 60, this.y + this.height / 2 - 25, 60, 50); // Pugno più lungo e spesso
+        }
     },
 
     update(canvas, otherPlayer) {
@@ -116,6 +147,21 @@ export const player2 = {
         if (!this.isJumping) {
             this.velocityY = -this.jumpStrength;
             this.isJumping = true;
+        }
+    },
+
+    punch() {
+        if (!this.punchCooldown) {
+            this.isPunching = true;
+            this.punchCooldown = true;
+
+            setTimeout(() => {
+                this.isPunching = false;
+            }, 200);
+
+            setTimeout(() => {
+                this.punchCooldown = false;
+            }, 500);
         }
     }
 };
