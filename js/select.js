@@ -1,9 +1,9 @@
 let selectedCharacters = { 1: null, 2: null };
 
 const characterData = {
-    ryu: { img: "assets/characters/ryu.png", name: "Ryu" },
-    ken: { img: "assets/characters/ken.png", name: "Ken" },
-    chunli: { img: "assets/characters/chunli.png", name: "Chun-Li" }
+    nexarion: { img: "ImmaginiMaliziose/Nexarion/Sprites/Idle.png", name: "Nexarion" },
+    alyndra: { img: "ImmaginiMaliziose/Alyndra/Sprites/Idle.png", name: "Alyndra" },
+    aedwyn: { img: "ImmaginiMaliziose/Aedwyn/Sprites/Idle.png", name: "Aedwyn" }
 };
 
 document.addEventListener("DOMContentLoaded", function() {

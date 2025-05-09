@@ -1,7 +1,7 @@
 const characterColors = {
-    ryu: 'blue',
-    ken: 'red',
-    chunli: 'green'
+    aedwyn: 'blue',
+    alyndra: 'pink',
+    nexarion: 'purple'
 };
 
 export function setPlayerSprite(player, character) {
