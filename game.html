@@ -23,26 +23,25 @@
     <script type="module">
         import { player1, player2, setPlayerSprite } from './js/player.js';
         import { setupControls, handlePlayerMovement } from './js/controls.js';
-    
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Imposta sprite/colore in base alla selezione
         setPlayerSprite(player1, localStorage.getItem('player1Character'));
         setPlayerSprite(player2, localStorage.getItem('player2Character'));
-    
+
         setupControls();
-    
+
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            handlePlayerMovement();
-            player1.update(canvas, player2);
+            const { moving1 } = handlePlayerMovement();
+            player1.update(canvas, player2, moving1);
             player2.update(canvas, player1);
             player1.draw(ctx);
             player2.draw(ctx);
             requestAnimationFrame(gameLoop);
         }
-    
+
         gameLoop();
     </script>
 </body>
