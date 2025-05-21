@@ -16,7 +16,9 @@ export function setPlayerSprite(player, character) {
         player.frameInterval = 50;
         player.spriteImages = {
             idle: loadImage(sprites.aedwyn.idle.image),
-            run: loadImage(sprites.aedwyn.run.image)
+            run: loadImage(sprites.aedwyn.run.image),
+            jump: loadImage(sprites.aedwyn.jump.image),
+            fall: loadImage(sprites.aedwyn.fall.image)
         };
     } else {
         // fallback: colore
@@ -33,7 +35,7 @@ export const player1 = {
     speed: 10,
     velocityY: 0,
     gravity: 1.2,
-    jumpStrength: 16,
+    jumpStrength: 22.5,
     isJumping: false,
     isPunching: false,
     punchCooldown: false,
@@ -43,7 +45,7 @@ export const player1 = {
     currentAnim: 'idle',
     frameIndex: 0,
     frameTimer: 0,
-    frameInterval: 50,
+    frameInterval: 100,
     spriteImages: {},
     color: 'blue',
 
@@ -108,12 +110,26 @@ export const player1 = {
 
         // Gestione animazione
         if (this.character === 'aedwyn' && this.spriteData) {
-            const newAnim = (this.moveDir !== 0) ? 'run' : 'idle';
+            let newAnim = 'idle';
+            if (this.isJumping || this.velocityY !== 0) {
+                if (this.velocityY < -1) {
+                    newAnim = 'jump';
+                } else if (this.velocityY > 1) {
+                    newAnim = 'fall';
+                } else {
+                    // Se è in aria ma non sale né scende velocemente, resta su jump/fall
+                    newAnim = this.currentAnim;
+                }
+            } else if (this.moveDir !== 0) {
+                newAnim = 'run';
+            }
+
             if (this.currentAnim !== newAnim) {
                 this.currentAnim = newAnim;
-                this.frameIndex = 0; // RESETTA il frame ogni cambio animazione!
+                this.frameIndex = 0;
                 this.frameTimer = 0;
             }
+
             this.frameTimer += 16.67; // ~60fps
             if (this.frameTimer >= this.frameInterval) {
                 this.frameTimer = 0;
@@ -144,13 +160,12 @@ export const player1 = {
 export const player2 = {
     x: 1000,
     y: 500,
-    width: 90,
+    width: 180,
     height: 200,
-    color: 'red',
     speed: 10,
     velocityY: 0,
     gravity: 1.2,
-    jumpStrength: 16,
+    jumpStrength: 22.5,
     isJumping: false,
     isPunching: false,
     punchCooldown: false,

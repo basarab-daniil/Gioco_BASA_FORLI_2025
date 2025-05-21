@@ -42,9 +42,6 @@ export const sprites = {
             image: "ImmaginiMaliziose/Aedwyn/Sprites/Fall.png",
             frames: [
                 { x: 54, y: 45, w: 31, h: 38 },
-                { x: 144, y: 45, w: 32, h: 38 },
-                { x: 334, y: 45, w: 32, h: 38 },
-                { x: 474, y: 45, w: 32, h: 38 },
             ]
         },
 
