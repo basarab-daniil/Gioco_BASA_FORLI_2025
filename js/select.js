@@ -8,11 +8,7 @@ const characterData = {
 
 document.addEventListener("DOMContentLoaded", function() {
     const mode = localStorage.getItem('gameMode');
-    if (mode === '1v1') {
         document.getElementById('mode-title').innerText = "Seleziona i personaggi per il PvP";
-    } else {
-        document.getElementById('mode-title').innerText = "Seleziona i personaggi per la modalità Pratica";
-    }
     updatePreviews();
 });
 
