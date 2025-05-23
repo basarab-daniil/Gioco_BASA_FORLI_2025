@@ -20,10 +20,12 @@ export function setPlayerSprite(player, character) {
             jump: loadImage(sprites.aedwyn.jump.image),
             fall: loadImage(sprites.aedwyn.fall.image)
         };
+        player.isFlipped = player === player2; // player2 va specchiato
     } else {
         // fallback: colore
         player.character = character;
         player.color = character === 'alyndra' ? 'pink' : character === 'nexarion' ? 'purple' : 'gray';
+        player.isFlipped = false;
     }
 }
 
@@ -170,15 +172,45 @@ export const player2 = {
     isPunching: false,
     punchCooldown: false,
     moveDir: 0,
+    character: null,
+    spriteData: null,
+    currentAnim: 'idle',
+    frameIndex: 0,
+    frameTimer: 0,
+    frameInterval: 100,
+    spriteImages: {},
+    color: 'red',
+    isFlipped: false,
 
     draw(ctx) {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        if (this.character === 'aedwyn' && this.spriteData) {
+            const anim = this.spriteData[this.currentAnim];
+            const img = this.spriteImages[this.currentAnim];
+            const frame = anim.frames[this.frameIndex] || anim.frames[0];
+            if (img && frame) {
+                ctx.save();
+                ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                ctx.scale(-1, 1);
+                ctx.drawImage(
+                    img,
+                    frame.x, frame.y, frame.w, frame.h,
+                    -this.width / 2, -this.height / 2, this.width, this.height
+                );
+                ctx.restore();
+            }
+        } else {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
 
-        // Disegna il pugno se il giocatore sta colpendo
+        // Pugno
         if (this.isPunching) {
             ctx.fillStyle = 'yellow';
-            ctx.fillRect(this.x - 60, this.y + this.height / 2 - 25, 60, 50); // Pugno più lungo e spesso
+            if (this.character === 'aedwyn') {
+                ctx.fillRect(this.x - 60, this.y + this.height / 2 - 25, 60, 50);
+            } else {
+                ctx.fillRect(this.x - 60, this.y + this.height / 2 - 25, 60, 50);
+            }
         }
     },
 
@@ -213,6 +245,36 @@ export const player2 = {
             } else {
                 this.x += this.speed;
                 otherPlayer.x -= otherPlayer.speed;
+            }
+        }
+
+        // Gestione animazione per Aedwyn
+        if (this.character === 'aedwyn' && this.spriteData) {
+            let newAnim = 'idle';
+            if (this.isJumping || this.velocityY !== 0) {
+                if (this.velocityY < -1) {
+                    newAnim = 'jump';
+                } else if (this.velocityY > 1) {
+                    newAnim = 'fall';
+                } else {
+                    newAnim = this.currentAnim;
+                }
+            } else if (this.moveDir !== 0) {
+                newAnim = 'run';
+            }
+
+            if (this.currentAnim !== newAnim) {
+                this.currentAnim = newAnim;
+                this.frameIndex = 0;
+                this.frameTimer = 0;
+            }
+
+            this.frameTimer += 16.67; // ~60fps
+            if (this.frameTimer >= this.frameInterval) {
+                this.frameTimer = 0;
+                this.frameIndex++;
+                const frames = this.spriteData[this.currentAnim].frames.length;
+                if (this.frameIndex >= frames) this.frameIndex = 0;
             }
         }
     },
