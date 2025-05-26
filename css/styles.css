@@ -94,13 +94,17 @@ button:hover {
 .player-col {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-end; /* Cambia da flex-start a flex-end */
     width: 220px;
     min-width: 200px;
 }
 
-.player-col.right {
-    align-items: flex-end;
+.player-col.left .character-list {
+    align-items: flex-start;
+}
+
+.player-col.left {
+    align-items: flex-start;
 }
 
 .character-list {
@@ -112,6 +116,7 @@ button:hover {
 
 .character-btn {
     width: 100%;
+    min-width: 320px;      /* Aumenta ancora la larghezza minima */
     padding: 32px 0;
     font-size: 2rem;
     border-radius: 16px;
@@ -122,6 +127,9 @@ button:hover {
     margin-bottom: 0;
     cursor: pointer;
     transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+    white-space: normal;
+    word-break: break-word;
+    box-sizing: border-box;
 }
 
 .character-btn.selected1 {
@@ -224,4 +232,8 @@ button:hover {
 .character:hover, .character.selected {
     border: 3px solid yellow;
     transform: scale(1.1);
+}
+
+.player-col.left .character-list .character-btn {
+    margin-left: -100px;
 }

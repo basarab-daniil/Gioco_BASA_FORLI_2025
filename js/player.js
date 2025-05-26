@@ -1,25 +1,24 @@
 import { sprites } from './sprites.js';
 
-function loadImage(src) {
-    const img = new Image();
-    img.src = src;
-    return img;
-}
-
+// Funzione per impostare lo sprite e le immagini per ogni player
 export function setPlayerSprite(player, character) {
-    if (character === 'aedwyn') {
-        player.character = 'aedwyn';
-        player.spriteData = sprites.aedwyn;
+    if (character === 'aedwyn' || character === 'alyndra' || character === 'nexarion') {
+        player.character = character;
+        player.spriteData = sprites[character];
         player.currentAnim = 'idle';
         player.frameIndex = 0;
         player.frameTimer = 0;
         player.frameInterval = 50;
         player.spriteImages = {
-            idle: loadImage(sprites.aedwyn.idle.image),
-            run: loadImage(sprites.aedwyn.run.image),
-            jump: loadImage(sprites.aedwyn.jump.image),
-            fall: loadImage(sprites.aedwyn.fall.image)
+            idle: new Image(),
+            run: new Image(),
+            jump: new Image(),
+            fall: new Image()
         };
+        player.spriteImages.idle.src = sprites[character].idle.image;
+        player.spriteImages.run.src = sprites[character].run.image;
+        player.spriteImages.jump.src = sprites[character].jump.image;
+        player.spriteImages.fall.src = sprites[character].fall.image;
         player.isFlipped = player === player2; // player2 va specchiato
     } else {
         // fallback: colore
@@ -29,6 +28,7 @@ export function setPlayerSprite(player, character) {
     }
 }
 
+// --- PLAYER 1 ---
 export const player1 = {
     x: 300,
     y: 500,
@@ -50,32 +50,54 @@ export const player1 = {
     frameInterval: 100,
     spriteImages: {},
     color: 'blue',
+    isFlipped: false,
 
     draw(ctx) {
-        if (this.character === 'aedwyn' && this.spriteData) {
+        // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
+        if (
+            (this.character === 'aedwyn' || this.character === 'alyndra' || this.character === 'nexarion')
+            && this.spriteData
+        ) {
             const anim = this.spriteData[this.currentAnim];
             const img = this.spriteImages[this.currentAnim];
-            // Proteggi da frameIndex fuori range
             const frame = anim.frames[this.frameIndex] || anim.frames[0];
             if (img && frame) {
-                ctx.drawImage(
-                    img,
-                    frame.x, frame.y, frame.w, frame.h,
-                    this.x, this.y, this.width, this.height
-                );
+                if (this.isFlipped) {
+                    ctx.save();
+                    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(
+                        img,
+                        frame.x, frame.y, frame.w, frame.h,
+                        -this.width / 2, -this.height / 2, this.width, this.height
+                    );
+                    ctx.restore();
+                } else {
+                    ctx.drawImage(
+                        img,
+                        frame.x, frame.y, frame.w, frame.h,
+                        this.x, this.y, this.width, this.height
+                    );
+                }
             }
         } else {
+            // --- FALLBACK rettangolo colorato ---
             ctx.fillStyle = this.color;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
+        // --- Pugno ---
         if (this.isPunching) {
             ctx.fillStyle = 'yellow';
-            ctx.fillRect(this.x + this.width, this.y + this.height / 2 - 25, 60, 50);
+            if (this.isFlipped) {
+                ctx.fillRect(this.x - 60, this.y + this.height / 2 - 25, 60, 50);
+            } else {
+                ctx.fillRect(this.x + this.width, this.y + this.height / 2 - 25, 60, 50);
+            }
         }
     },
 
     update(canvas, otherPlayer, moving) {
-        // Movimento orizzontale gestito qui, non in controls.js
+        // Movimento orizzontale
         if (typeof this.moveDir === 'number') {
             this.x += this.moveDir * this.speed;
         }
@@ -93,7 +115,7 @@ export const player1 = {
         if (this.x < 0) this.x = 0;
         if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
 
-        // Collisione
+        // Collisione con altro player
         if (
             otherPlayer &&
             this.x < otherPlayer.x + otherPlayer.width &&
@@ -110,8 +132,11 @@ export const player1 = {
             }
         }
 
-        // Gestione animazione
-        if (this.character === 'aedwyn' && this.spriteData) {
+        // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
+        if (
+            (this.character === 'aedwyn' || this.character === 'alyndra' || this.character === 'nexarion')
+            && this.spriteData
+        ) {
             let newAnim = 'idle';
             if (this.isJumping || this.velocityY !== 0) {
                 if (this.velocityY < -1) {
@@ -119,7 +144,6 @@ export const player1 = {
                 } else if (this.velocityY > 1) {
                     newAnim = 'fall';
                 } else {
-                    // Se è in aria ma non sale né scende velocemente, resta su jump/fall
                     newAnim = this.currentAnim;
                 }
             } else if (this.moveDir !== 0) {
@@ -159,6 +183,7 @@ export const player1 = {
     }
 };
 
+// --- PLAYER 2 ---
 export const player2 = {
     x: 1000,
     y: 500,
@@ -183,33 +208,45 @@ export const player2 = {
     isFlipped: false,
 
     draw(ctx) {
-        if (this.character === 'aedwyn' && this.spriteData) {
+        // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
+        if (
+            (this.character === 'aedwyn' || this.character === 'alyndra' || this.character === 'nexarion')
+            && this.spriteData
+        ) {
             const anim = this.spriteData[this.currentAnim];
             const img = this.spriteImages[this.currentAnim];
             const frame = anim.frames[this.frameIndex] || anim.frames[0];
             if (img && frame) {
-                ctx.save();
-                ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-                ctx.scale(-1, 1);
-                ctx.drawImage(
-                    img,
-                    frame.x, frame.y, frame.w, frame.h,
-                    -this.width / 2, -this.height / 2, this.width, this.height
-                );
-                ctx.restore();
+                if (this.isFlipped) {
+                    ctx.save();
+                    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(
+                        img,
+                        frame.x, frame.y, frame.w, frame.h,
+                        -this.width / 2, -this.height / 2, this.width, this.height
+                    );
+                    ctx.restore();
+                } else {
+                    ctx.drawImage(
+                        img,
+                        frame.x, frame.y, frame.w, frame.h,
+                        this.x, this.y, this.width, this.height
+                    );
+                }
             }
         } else {
+            // --- FALLBACK rettangolo colorato ---
             ctx.fillStyle = this.color;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
-
-        // Pugno
+        // --- Pugno ---
         if (this.isPunching) {
             ctx.fillStyle = 'yellow';
-            if (this.character === 'aedwyn') {
+            if (this.isFlipped) {
                 ctx.fillRect(this.x - 60, this.y + this.height / 2 - 25, 60, 50);
             } else {
-                ctx.fillRect(this.x - 60, this.y + this.height / 2 - 25, 60, 50);
+                ctx.fillRect(this.x + this.width, this.y + this.height / 2 - 25, 60, 50);
             }
         }
     },
@@ -232,6 +269,7 @@ export const player2 = {
         if (this.x < 0) this.x = 0;
         if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
 
+        // Collisione con altro player
         if (
             otherPlayer &&
             this.x < otherPlayer.x + otherPlayer.width &&
@@ -248,8 +286,11 @@ export const player2 = {
             }
         }
 
-        // Gestione animazione per Aedwyn
-        if (this.character === 'aedwyn' && this.spriteData) {
+        // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
+        if (
+            (this.character === 'aedwyn' || this.character === 'alyndra' || this.character === 'nexarion')
+            && this.spriteData
+        ) {
             let newAnim = 'idle';
             if (this.isJumping || this.velocityY !== 0) {
                 if (this.velocityY < -1) {
