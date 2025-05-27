@@ -1,5 +1,8 @@
 import { player1, player2 } from './player.js';
 
+//
+// Stato dei tasti premuti
+//
 const keys = {
     a: false,
     d: false,
@@ -11,8 +14,12 @@ const keys = {
     ArrowDown: false
 };
 
+//
+// Setup degli event listener per i controlli dei player
+//
 export function setupControls() {
     window.addEventListener('keydown', (e) => {
+        if (player1.dead || player2.dead) return;
         if (e.repeat) return; // Ignora ripetizioni per evitare spam
         keys[e.key] = true;
 
@@ -22,13 +29,19 @@ export function setupControls() {
     });
 
     window.addEventListener('keyup', (e) => {
+        if (player1.dead || player2.dead) return;
         keys[e.key] = false;
     });
 }
 
+//
+// Gestione del movimento dei player in base ai tasti premuti
+//
 export function handlePlayerMovement() {
     let moving1 = false;
     let moving2 = false;
+
+    if (player1.dead || player2.dead) return { moving1, moving2 };
 
     // Player 1
     if (keys.a && !keys.d) { player1.moveDir = -1; moving1 = true; }

@@ -22,33 +22,39 @@
 <body>
     <canvas id="gameCanvas" width="1400" height="600"></canvas>
     <script type="module">
+        // --- Import dei moduli ---
         import { player1, player2, setPlayerSprite } from './js/player.js';
         import { setupControls, handlePlayerMovement } from './js/controls.js';
         import { drawHealthBars } from './js/game.js';
 
+        // --- Setup canvas e sfondo ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
-        // Carica l'immagine di sfondo
         const background = new Image();
         background.src = 'ImmaginiMaliziose/Arene/Background/image1.png';
 
-        setPlayerSprite(player1, localStorage.getItem('player1Character'));
-        setPlayerSprite(player2, localStorage.getItem('player2Character'));
+        // --- Inizializza i player con i personaggi scelti ---
+        setPlayerSprite(player1, localStorage.getItem('player1Character'), false);
+        setPlayerSprite(player2, localStorage.getItem('player2Character'), true);
 
+        // --- Setup controlli ---
         setupControls();
 
-        const DAMAGE = 10; // 1/10 della vita
+        // --- Costanti e stato partita ---
+        const DAMAGE = 10;
+        let gameEnded = false;
+        let winnerName = "";
 
+        //
+        // Collisione tra pugni e hitbox dei player
+        //
         function checkPunchCollision() {
-            // --- Rettangolo pugno player1 ---
             let punch1 = {
                 x: player1.isFlipped ? player1.x - 60 : player1.x + player1.width,
                 y: player1.y + player1.height / 2 - 25,
                 width: 60,
                 height: 50
             };
-            // --- Rettangolo pugno player2 ---
             let punch2 = {
                 x: player2.isFlipped ? player2.x - 60 : player2.x + player2.width,
                 y: player2.y + player2.height / 2 - 25,
@@ -83,38 +89,145 @@
             }
         }
 
+        //
+        // Restituisce il nome del personaggio per il messaggio di vittoria
+        //
+        function getCharacterName(char) {
+            if (char === 'aedwyn') return 'Aedwyn';
+            if (char === 'alyndra') return 'Alyndra';
+            if (char === 'nexarion') return 'Nexarion';
+            return '???';
+        }
+
+        //
+        // Mostra il messaggio di vittoria e torna alla select
+        //
+        function showWinner() {
+            alert("Vittoria di " + winnerName + "!");
+            window.location.href = "select.html";
+        }
+
+        //
+        // Applica i danni e gestisce la morte e le animazioni finali
+        //
         function applyDamage() {
-            if (player1.isHit) {
+            if (gameEnded) return;
+
+            // Player 1 colpito
+            if (player1.isHit && !player1.dead) {
                 player1.vita = Math.max(0, player1.vita - DAMAGE);
                 player1.isHit = false;
+                if (player1.spriteData) {
+                    player1.hitInProgress = true;
+                    player1.currentAnim = 'hit';
+                    player1.frameIndex = 0;
+                    player1.frameTimer = 0;
+                }
+                // Se la vita è finita, avvia death
+                if (player1.vita <= 0) {
+                    player1.deathInProgress = true;
+                    player1.currentAnim = 'death';
+                    player1.frameIndex = 0;
+                    player1.frameTimer = 0;
+                    gameEnded = true;
+                    winnerName = getCharacterName(player2.character);
+                    setTimeout(showWinner, 3000);
+                }
             }
-            if (player2.isHit) {
+
+            // Player 2 colpito
+            if (player2.isHit && !player2.dead) {
                 player2.vita = Math.max(0, player2.vita - DAMAGE);
                 player2.isHit = false;
+                if (player2.spriteData) {
+                    player2.hitInProgress = true;
+                    player2.currentAnim = 'hit';
+                    player2.frameIndex = 0;
+                    player2.frameTimer = 0;
+                }
+                // Se la vita è finita, avvia death
+                if (player2.vita <= 0) {
+                    player2.deathInProgress = true;
+                    player2.currentAnim = 'death';
+                    player2.frameIndex = 0;
+                    player2.frameTimer = 0;
+                    gameEnded = true;
+                    winnerName = getCharacterName(player1.character);
+                    setTimeout(showWinner, 3000);
+                }
             }
         }
 
+        //
+        // PATCH: disegna la death senza stretch verticale, appoggiata a terra
+        //
+        function drawPlayerWithDeathFix(player) {
+            if (
+                player.spriteData &&
+                player.currentAnim === 'death' &&
+                player.spriteImages['death'] &&
+                player.spriteData['death']
+            ) {
+                const anim = player.spriteData['death'];
+                const img = player.spriteImages['death'];
+                const frame = anim.frames[player.frameIndex] || anim.frames[anim.frames.length - 1];
+                // Mantieni la larghezza del player, ma scala l'altezza in proporzione al frame originale
+                const drawWidth = player.width;
+                const scale = player.width / frame.w;
+                const drawHeight = frame.h * scale;
+                const drawY = player.y + (player.height - drawHeight); // Appoggia a terra
+
+                if (player.isFlipped) {
+                    ctx.save();
+                    ctx.translate(player.x + player.width / 2, drawY + drawHeight / 2);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(
+                        img,
+                        frame.x, frame.y, frame.w, frame.h,
+                        -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight
+                    );
+                    ctx.restore();
+                } else {
+                    ctx.drawImage(
+                        img,
+                        frame.x, frame.y, frame.w, frame.h,
+                        player.x, drawY, drawWidth, drawHeight
+                    );
+                }
+            } else {
+                player.draw(ctx);
+            }
+        }
+
+        //
+        // GAME LOOP principale
+        //
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Disegna lo sfondo
+            // Sfondo
             ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
+            // Barre della vita
             drawHealthBars(ctx, canvas.width);
 
+            // Movimento e update dei player
             const { moving1 } = handlePlayerMovement();
             player1.update(canvas, player2, moving1);
             player2.update(canvas, player1);
 
-            // --- LOGICA PUGNO E DANNI ---
+            // Collisioni e danni
             checkPunchCollision();
             applyDamage();
 
-            player1.draw(ctx);
-            player2.draw(ctx);
+            // Disegna i player (patch death)
+            drawPlayerWithDeathFix(player1);
+            drawPlayerWithDeathFix(player2);
+
             requestAnimationFrame(gameLoop);
         }
 
+        // Avvia il gioco quando il background è caricato
         background.onload = () => {
             gameLoop();
         };

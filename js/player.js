@@ -1,7 +1,9 @@
 import { sprites } from './sprites.js';
 
+//
 // Funzione per impostare lo sprite e le immagini per ogni player
-export function setPlayerSprite(player, character) {
+//
+export function setPlayerSprite(player, character, flipped = false) {
     if (character === 'aedwyn' || character === 'alyndra' || character === 'nexarion') {
         player.character = character;
         player.spriteData = sprites[character];
@@ -13,23 +15,38 @@ export function setPlayerSprite(player, character) {
             idle: new Image(),
             run: new Image(),
             jump: new Image(),
-            fall: new Image()
+            fall: new Image(),
+            attack: new Image(),
+            hit: new Image(),
+            death: new Image()
         };
         player.spriteImages.idle.src = sprites[character].idle.image;
         player.spriteImages.run.src = sprites[character].run.image;
         player.spriteImages.jump.src = sprites[character].jump.image;
         player.spriteImages.fall.src = sprites[character].fall.image;
-        player.isFlipped = player === player2; // player2 va specchiato
+        player.spriteImages.attack.src = sprites[character].attack.image;
+        player.spriteImages.hit.src = sprites[character].hit.image;
+        player.spriteImages.death.src = sprites[character].death.image;
+        player.isFlipped = flipped;
     } else {
-        // fallback: colore
         player.character = character;
         player.color = character === 'alyndra' ? 'pink' : character === 'nexarion' ? 'purple' : 'gray';
         player.isFlipped = false;
     }
 }
 
+//
+// Funzione di utilità per verificare se il personaggio ha sprite animati
+//
+function isSpriteCharacter(character) {
+    return character === 'aedwyn' || character === 'alyndra' || character === 'nexarion';
+}
+
+//
 // --- PLAYER 1 ---
+//
 export const player1 = {
+    // --- Stato fisico e movimento ---
     x: 300,
     y: 500,
     width: 180,
@@ -39,9 +56,9 @@ export const player1 = {
     gravity: 1.2,
     jumpStrength: 22.5,
     isJumping: false,
-    isPunching: false,
-    punchCooldown: false,
-    moveDir: 0, // -1 sinistra, 1 destra, 0 fermo
+    moveDir: 0,
+
+    // --- Stato animazione e sprite ---
     character: null,
     spriteData: null,
     currentAnim: 'idle',
@@ -49,21 +66,31 @@ export const player1 = {
     frameTimer: 0,
     frameInterval: 100,
     spriteImages: {},
-    color: 'blue',
     isFlipped: false,
+
+    // --- Stato combattimento ---
+    isPunching: false,
+    punchCooldown: false,
+    hasHit: false,
+    attackInProgress: false,
+    hitInProgress: false,
+    dead: false,
+    deathInProgress: false,
     vita: 100,
     isHit: false,
-    hasHit: false, // <--- aggiungi questa riga
 
+    // --- Colore fallback ---
+    color: 'blue',
+
+    //
+    // Disegna il player sul canvas
+    //
     draw(ctx) {
-        // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
-        if (
-            (this.character === 'aedwyn' || this.character === 'alyndra' || this.character === 'nexarion')
-            && this.spriteData
-        ) {
-            const anim = this.spriteData[this.currentAnim];
-            const img = this.spriteImages[this.currentAnim];
-            const frame = anim.frames[this.frameIndex] || anim.frames[0];
+        if (isSpriteCharacter(this.character) && this.spriteData) {
+            let anim = this.spriteData[this.currentAnim];
+            let img = this.spriteImages[this.currentAnim] || this.spriteImages['idle'];
+            let frame = anim.frames[this.frameIndex] || anim.frames[0];
+
             if (img && frame) {
                 if (this.isFlipped) {
                     ctx.save();
@@ -84,12 +111,13 @@ export const player1 = {
                 }
             }
         } else {
-            // --- FALLBACK rettangolo colorato ---
+            // Fallback: rettangolo colorato
             ctx.fillStyle = this.color;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
-        // --- Pugno ---
-        if (this.isPunching) {
+
+        // Fallback: disegna il pugno se non sprite
+        if (!isSpriteCharacter(this.character) && this.isPunching) {
             ctx.fillStyle = 'yellow';
             if (this.isFlipped) {
                 ctx.fillRect(this.x - 120, this.y + this.height / 2 - 25, 120, 50);
@@ -99,12 +127,18 @@ export const player1 = {
         }
     },
 
+    //
+    // Aggiorna stato fisico e animazione del player
+    //
     update(canvas, otherPlayer, moving) {
+        if (this.dead) return; // Blocca tutto se morto
+
         // Movimento orizzontale
         if (typeof this.moveDir === 'number') {
             this.x += this.moveDir * this.speed;
         }
 
+        // Gravità e salto
         this.velocityY += this.gravity;
         this.y += this.velocityY;
 
@@ -135,20 +169,19 @@ export const player1 = {
             }
         }
 
-        // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
-        if (
-            (this.character === 'aedwyn' || this.character === 'alyndra' || this.character === 'nexarion')
-            && this.spriteData
-        ) {
+        // --- Gestione animazioni ---
+        if (isSpriteCharacter(this.character) && this.spriteData) {
             let newAnim = 'idle';
-            if (this.isJumping || this.velocityY !== 0) {
-                if (this.velocityY < -1) {
-                    newAnim = 'jump';
-                } else if (this.velocityY > 1) {
-                    newAnim = 'fall';
-                } else {
-                    newAnim = this.currentAnim;
-                }
+
+            if (this.deathInProgress) {
+                newAnim = 'death';
+            } else if (this.hitInProgress) {
+                newAnim = 'hit';
+            } else if (this.attackInProgress) {
+                newAnim = 'attack';
+            } else if (this.isJumping || this.velocityY !== 0) {
+                if (this.velocityY < -1) newAnim = 'jump';
+                else if (this.velocityY > 1) newAnim = 'fall';
             } else if (this.moveDir !== 0) {
                 newAnim = 'run';
             }
@@ -164,34 +197,75 @@ export const player1 = {
                 this.frameTimer = 0;
                 this.frameIndex++;
                 const frames = this.spriteData[this.currentAnim].frames.length;
-                if (this.frameIndex >= frames) this.frameIndex = 0;
+
+                // Fine animazione attacco
+                if (this.currentAnim === 'attack' && this.frameIndex >= frames) {
+                    this.attackInProgress = false;
+                    this.isPunching = false;
+                    this.currentAnim = 'idle';
+                    this.frameIndex = 0;
+                }
+                // Fine animazione hit
+                else if (this.currentAnim === 'hit' && this.frameIndex >= frames) {
+                    this.hitInProgress = false;
+                    this.currentAnim = 'idle';
+                    this.frameIndex = 0;
+                }
+                // Fine animazione death: resta sull'ultimo frame
+                else if (this.currentAnim === 'death' && this.frameIndex >= frames) {
+                    this.frameIndex = frames - 1;
+                    this.dead = true;
+                }
+                // Loop per altre animazioni
+                else if (this.frameIndex >= frames) {
+                    this.frameIndex = 0;
+                }
             }
         }
 
+        // Reset hasHit se non si sta colpendo
         if (!this.isPunching) {
             this.hasHit = false;
         }
     },
 
-    jump() {
-        if (!this.isJumping) {
-            this.velocityY = -this.jumpStrength;
-            this.isJumping = true;
+    //
+    // Avvia l'animazione di pugno/attacco
+    //
+    punch() {
+        if (!this.punchCooldown && !this.dead) {
+            this.isPunching = true;
+            if (isSpriteCharacter(this.character)) {
+                this.attackInProgress = true;
+                this.currentAnim = 'attack';
+                this.frameIndex = 0;
+                this.frameTimer = 0;
+            }
+            this.punchCooldown = true;
+            setTimeout(() => {
+                if (!isSpriteCharacter(this.character)) this.isPunching = false;
+            }, 200);
+            setTimeout(() => { this.punchCooldown = false; }, 500);
         }
     },
 
-    punch() {
-        if (!this.punchCooldown) {
-            this.isPunching = true;
-            this.punchCooldown = true;
-            setTimeout(() => { this.isPunching = false; }, 200);
-            setTimeout(() => { this.punchCooldown = false; }, 500);
+    //
+    // Avvia il salto
+    //
+    jump() {
+        if (!this.isJumping && this.velocityY === 0 && !this.dead) {
+            this.velocityY = -this.jumpStrength;
+            this.isJumping = true;
         }
     }
 };
 
+//
 // --- PLAYER 2 ---
+// (Stessa struttura di player1, cambia solo posizione iniziale e colore)
+//
 export const player2 = {
+    // --- Stato fisico e movimento ---
     x: 1000,
     y: 500,
     width: 180,
@@ -201,9 +275,9 @@ export const player2 = {
     gravity: 1.2,
     jumpStrength: 22.5,
     isJumping: false,
-    isPunching: false,
-    punchCooldown: false,
     moveDir: 0,
+
+    // --- Stato animazione e sprite ---
     character: null,
     spriteData: null,
     currentAnim: 'idle',
@@ -211,21 +285,31 @@ export const player2 = {
     frameTimer: 0,
     frameInterval: 100,
     spriteImages: {},
-    color: 'red',
     isFlipped: false,
+
+    // --- Stato combattimento ---
+    isPunching: false,
+    punchCooldown: false,
+    hasHit: false,
+    attackInProgress: false,
+    hitInProgress: false,
+    dead: false,
+    deathInProgress: false,
     vita: 100,
     isHit: false,
-    hasHit: false, // <--- aggiungi questa riga
 
+    // --- Colore fallback ---
+    color: 'red',
+
+    //
+    // Disegna il player sul canvas
+    //
     draw(ctx) {
-        // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
-        if (
-            (this.character === 'aedwyn' || this.character === 'alyndra' || this.character === 'nexarion')
-            && this.spriteData
-        ) {
-            const anim = this.spriteData[this.currentAnim];
-            const img = this.spriteImages[this.currentAnim];
-            const frame = anim.frames[this.frameIndex] || anim.frames[0];
+        if (isSpriteCharacter(this.character) && this.spriteData) {
+            let anim = this.spriteData[this.currentAnim];
+            let img = this.spriteImages[this.currentAnim] || this.spriteImages['idle'];
+            let frame = anim.frames[this.frameIndex] || anim.frames[0];
+
             if (img && frame) {
                 if (this.isFlipped) {
                     ctx.save();
@@ -246,12 +330,10 @@ export const player2 = {
                 }
             }
         } else {
-            // --- FALLBACK rettangolo colorato ---
             ctx.fillStyle = this.color;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
-        // --- Pugno ---
-        if (this.isPunching) {
+        if (!isSpriteCharacter(this.character) && this.isPunching) {
             ctx.fillStyle = 'yellow';
             if (this.isFlipped) {
                 ctx.fillRect(this.x - 120, this.y + this.height / 2 - 25, 120, 50);
@@ -261,11 +343,18 @@ export const player2 = {
         }
     },
 
+    //
+    // Aggiorna stato fisico e animazione del player
+    //
     update(canvas, otherPlayer) {
+        if (this.dead) return;
+
+        // Movimento orizzontale
         if (typeof this.moveDir === 'number') {
             this.x += this.moveDir * this.speed;
         }
 
+        // Gravità e salto
         this.velocityY += this.gravity;
         this.y += this.velocityY;
 
@@ -296,20 +385,19 @@ export const player2 = {
             }
         }
 
-        // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
-        if (
-            (this.character === 'aedwyn' || this.character === 'alyndra' || this.character === 'nexarion')
-            && this.spriteData
-        ) {
+        // --- Gestione animazioni ---
+        if (isSpriteCharacter(this.character) && this.spriteData) {
             let newAnim = 'idle';
-            if (this.isJumping || this.velocityY !== 0) {
-                if (this.velocityY < -1) {
-                    newAnim = 'jump';
-                } else if (this.velocityY > 1) {
-                    newAnim = 'fall';
-                } else {
-                    newAnim = this.currentAnim;
-                }
+
+            if (this.deathInProgress) {
+                newAnim = 'death';
+            } else if (this.hitInProgress) {
+                newAnim = 'hit';
+            } else if (this.attackInProgress) {
+                newAnim = 'attack';
+            } else if (this.isJumping || this.velocityY !== 0) {
+                if (this.velocityY < -1) newAnim = 'jump';
+                else if (this.velocityY > 1) newAnim = 'fall';
             } else if (this.moveDir !== 0) {
                 newAnim = 'run';
             }
@@ -325,34 +413,65 @@ export const player2 = {
                 this.frameTimer = 0;
                 this.frameIndex++;
                 const frames = this.spriteData[this.currentAnim].frames.length;
-                if (this.frameIndex >= frames) this.frameIndex = 0;
+
+                // Fine animazione attacco
+                if (this.currentAnim === 'attack' && this.frameIndex >= frames) {
+                    this.attackInProgress = false;
+                    this.isPunching = false;
+                    this.currentAnim = 'idle';
+                    this.frameIndex = 0;
+                }
+                // Fine animazione hit
+                else if (this.currentAnim === 'hit' && this.frameIndex >= frames) {
+                    this.hitInProgress = false;
+                    this.currentAnim = 'idle';
+                    this.frameIndex = 0;
+                }
+                // Fine animazione death: resta sull'ultimo frame
+                else if (this.currentAnim === 'death' && this.frameIndex >= frames) {
+                    this.frameIndex = frames - 1;
+                    this.dead = true;
+                }
+                // Loop per altre animazioni
+                else if (this.frameIndex >= frames) {
+                    this.frameIndex = 0;
+                }
             }
         }
 
+        // Reset hasHit se non si sta colpendo
         if (!this.isPunching) {
             this.hasHit = false;
         }
     },
 
-    jump() {
-        if (!this.isJumping) {
-            this.velocityY = -this.jumpStrength;
-            this.isJumping = true;
+    //
+    // Avvia l'animazione di pugno/attacco
+    //
+    punch() {
+        if (!this.punchCooldown && !this.dead) {
+            this.isPunching = true;
+            if (isSpriteCharacter(this.character)) {
+                this.attackInProgress = true;
+                this.currentAnim = 'attack';
+                this.frameIndex = 0;
+                this.frameTimer = 0;
+            }
+            this.punchCooldown = true;
+            setTimeout(() => {
+                if (!isSpriteCharacter(this.character)) this.isPunching = false;
+            }, 200);
+            setTimeout(() => { this.punchCooldown = false; }, 500);
         }
     },
 
-    punch() {
-        if (!this.punchCooldown) {
-            this.isPunching = true;
-            this.punchCooldown = true;
-
-            setTimeout(() => {
-                this.isPunching = false;
-            }, 200);
-
-            setTimeout(() => {
-                this.punchCooldown = false;
-            }, 500);
+    //
+    // Avvia il salto
+    //
+    jump() {
+        if (!this.isJumping && this.velocityY === 0 && !this.dead) {
+            this.velocityY = -this.jumpStrength;
+            this.isJumping = true;
         }
     }
 };
