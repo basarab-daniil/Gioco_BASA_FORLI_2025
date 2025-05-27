@@ -1,32 +1,45 @@
-window.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+import { player1, player2 } from './player.js'; // <--- aggiungi questa riga
 
-    // Dimensioni e posizioni delle barre
-    const barWidth = 400;
-    const barHeight = 24;
-    const barMargin = 40;
+const healthBarConfig = {
+    width: 450,
+    height: 25,
+    margin: 50, // distanza dai bordi
+    yPosition: 30, // distanza dal top
+    backgroundColor: '#d3d3d3', // grigio chiaro
+    foregroundColor: '#ff0000'  // rosso
+};
 
-    // Barre Giocatore 1 (sinistra)
-    const bar1X = barMargin;
-    const bar1Y = 30;
+const maxHealth = 100;
 
-    // Barre Giocatore 2 (destra)
-    const bar2X = canvas.width - barWidth - barMargin;
-    const bar2Y = 30;
+// Funzione per disegnare una singola barra della vita
+function drawHealthBar(ctx, x, y, currentHealth, maxHealth) {
+    const { width, height, backgroundColor, foregroundColor } = healthBarConfig;
+    
+    // Disegna il rettangolo di sfondo (grigio)
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(x, y, width, height);
+    
+    // Calcola la larghezza della barra rossa in base alla vita rimanente
+    const healthPercentage = currentHealth / maxHealth;
+    const healthWidth = width * healthPercentage;
+    
+    // Disegna il rettangolo della vita (rosso)
+    ctx.fillStyle = foregroundColor;
+    ctx.fillRect(x, y, healthWidth, height);
+    
+    // Aggiungi un bordo nero
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, width, height);
+}
 
-    // Funzione per disegnare una barra (grigia sotto, rossa sopra)
-    function drawHealthBar(x, y, width, height) {
-        // Barra grigia (sotto)
-        ctx.fillStyle = '#888';
-        ctx.fillRect(x, y + height, width, 2);
-        // Barra rossa (sopra)
-        ctx.fillStyle = 'red';
-        ctx.fillRect(x, y, width, height);
-    }
+// Funzione per disegnare entrambe le barre della vita
+export function drawHealthBars(ctx, canvasWidth) {
+    const { width, margin, yPosition } = healthBarConfig;
+    const player1X = margin;
+    const player2X = canvasWidth - width - margin;
 
-    // Pulizia e disegno
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawHealthBar(bar1X, bar1Y, barWidth, barHeight);
-    drawHealthBar(bar2X, bar2Y, barWidth, barHeight);
-});
+    // Usa la vita attuale dei player!
+    drawHealthBar(ctx, player1X, yPosition, player1.vita, maxHealth);
+    drawHealthBar(ctx, player2X, yPosition, player2.vita, maxHealth);
+}

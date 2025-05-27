@@ -51,6 +51,7 @@ export const player1 = {
     spriteImages: {},
     color: 'blue',
     isFlipped: false,
+    vita: 100,
 
     draw(ctx) {
         // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
@@ -206,6 +207,7 @@ export const player2 = {
     spriteImages: {},
     color: 'red',
     isFlipped: false,
+    vita: 100,
 
     draw(ctx) {
         // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
