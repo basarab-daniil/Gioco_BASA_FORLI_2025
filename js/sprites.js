@@ -44,6 +44,17 @@ export const sprites = {
                 { x: 54, y: 45, w: 31, h: 38 },
             ]
         },
+        attack: {
+            image: "ImmaginiMaliziose/Aedwyn/Sprites/Attack.png",
+            frames: [
+                { x: 58, y: 22, w: 25, h: 61 },
+                { x: 196, y: 31, w: 27, h: 52 },
+                { x: 331, y: 36, w: 33, h: 47 },
+                { x: 472, y: 36, w: 31, h: 47 },
+                { x: 593, y: 32, w: 86, h: 51 },
+                { x: 733, y: 51, w: 48, h: 32 },
+            ]
+        },
 
     },
 

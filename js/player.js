@@ -52,6 +52,8 @@ export const player1 = {
     color: 'blue',
     isFlipped: false,
     vita: 100,
+    isHit: false,
+    hasHit: false, // <--- aggiungi questa riga
 
     draw(ctx) {
         // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
@@ -90,9 +92,9 @@ export const player1 = {
         if (this.isPunching) {
             ctx.fillStyle = 'yellow';
             if (this.isFlipped) {
-                ctx.fillRect(this.x - 60, this.y + this.height / 2 - 25, 60, 50);
+                ctx.fillRect(this.x - 120, this.y + this.height / 2 - 25, 120, 50);
             } else {
-                ctx.fillRect(this.x + this.width, this.y + this.height / 2 - 25, 60, 50);
+                ctx.fillRect(this.x + this.width, this.y + this.height / 2 - 25, 120, 50);
             }
         }
     },
@@ -165,6 +167,10 @@ export const player1 = {
                 if (this.frameIndex >= frames) this.frameIndex = 0;
             }
         }
+
+        if (!this.isPunching) {
+            this.hasHit = false;
+        }
     },
 
     jump() {
@@ -208,6 +214,8 @@ export const player2 = {
     color: 'red',
     isFlipped: false,
     vita: 100,
+    isHit: false,
+    hasHit: false, // <--- aggiungi questa riga
 
     draw(ctx) {
         // --- ANIMAZIONE SPRITE AEDWYN, ALYNDRA, NEXARION ---
@@ -246,9 +254,9 @@ export const player2 = {
         if (this.isPunching) {
             ctx.fillStyle = 'yellow';
             if (this.isFlipped) {
-                ctx.fillRect(this.x - 60, this.y + this.height / 2 - 25, 60, 50);
+                ctx.fillRect(this.x - 120, this.y + this.height / 2 - 25, 120, 50);
             } else {
-                ctx.fillRect(this.x + this.width, this.y + this.height / 2 - 25, 60, 50);
+                ctx.fillRect(this.x + this.width, this.y + this.height / 2 - 25, 120, 50);
             }
         }
     },
@@ -319,6 +327,10 @@ export const player2 = {
                 const frames = this.spriteData[this.currentAnim].frames.length;
                 if (this.frameIndex >= frames) this.frameIndex = 0;
             }
+        }
+
+        if (!this.isPunching) {
+            this.hasHit = false;
         }
     },
 

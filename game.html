@@ -15,7 +15,7 @@
             background-color: #f0f0f0;
         }
         canvas {
-            border: 2px solid black;
+            border: 7px solid black;
         }
     </style>
 </head>
@@ -29,23 +29,95 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Carica l'immagine di sfondo
+        const background = new Image();
+        background.src = 'ImmaginiMaliziose/Arene/Background/image1.png';
+
         setPlayerSprite(player1, localStorage.getItem('player1Character'));
         setPlayerSprite(player2, localStorage.getItem('player2Character'));
 
         setupControls();
 
+        const DAMAGE = 10; // 1/10 della vita
+
+        function checkPunchCollision() {
+            // --- Rettangolo pugno player1 ---
+            let punch1 = {
+                x: player1.isFlipped ? player1.x - 60 : player1.x + player1.width,
+                y: player1.y + player1.height / 2 - 25,
+                width: 60,
+                height: 50
+            };
+            // --- Rettangolo pugno player2 ---
+            let punch2 = {
+                x: player2.isFlipped ? player2.x - 60 : player2.x + player2.width,
+                y: player2.y + player2.height / 2 - 25,
+                width: 60,
+                height: 50
+            };
+
+            // Player 1 colpisce Player 2
+            if (
+                player1.isPunching &&
+                !player1.hasHit &&
+                punch1.x < player2.x + player2.width &&
+                punch1.x + punch1.width > player2.x &&
+                punch1.y < player2.y + player2.height &&
+                punch1.y + punch1.height > player2.y
+            ) {
+                player2.isHit = true;
+                player1.hasHit = true;
+            }
+
+            // Player 2 colpisce Player 1
+            if (
+                player2.isPunching &&
+                !player2.hasHit &&
+                punch2.x < player1.x + player1.width &&
+                punch2.x + punch2.width > player1.x &&
+                punch2.y < player1.y + player1.height &&
+                punch2.y + punch2.height > player1.y
+            ) {
+                player1.isHit = true;
+                player2.hasHit = true;
+            }
+        }
+
+        function applyDamage() {
+            if (player1.isHit) {
+                player1.vita = Math.max(0, player1.vita - DAMAGE);
+                player1.isHit = false;
+            }
+            if (player2.isHit) {
+                player2.vita = Math.max(0, player2.vita - DAMAGE);
+                player2.isHit = false;
+            }
+        }
+
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Disegna lo sfondo
+            ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
             drawHealthBars(ctx, canvas.width);
+
             const { moving1 } = handlePlayerMovement();
             player1.update(canvas, player2, moving1);
             player2.update(canvas, player1);
+
+            // --- LOGICA PUGNO E DANNI ---
+            checkPunchCollision();
+            applyDamage();
+
             player1.draw(ctx);
             player2.draw(ctx);
             requestAnimationFrame(gameLoop);
         }
 
-        gameLoop();
+        background.onload = () => {
+            gameLoop();
+        };
     </script>
 </body>
 </html>
